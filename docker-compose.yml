@@ -1,0 +1,39 @@
+services:
+  hadoop:
+    build: ./hadoop
+    container_name: hadoop
+    volumes:
+      - ./ventas_125052194.csv:/data/input/ventas_125052194.csv:ro
+      - ./mapreduce:/app/mapreduce
+      - ./ssh_keys:/ssh_keys:ro
+      - resultados:/data/output
+    networks: [red]
+
+  db:
+    image: postgres:16
+    container_name: db
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [red]
+
+  api:
+    build: ./api
+    container_name: api
+    env_file: .env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./ssh_keys:/ssh_keys:ro
+      - ./scripts:/scripts:ro
+      - ./evidencias:/evidencias:ro
+    depends_on:
+      - db
+    networks: [red]
+
+volumes:
+  pgdata:
+  resultados:
+
+networks:
+  red:
